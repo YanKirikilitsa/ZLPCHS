@@ -5,21 +5,21 @@ PROJECT_SRC_DIR = $(PROJECT_DIR)/src
 ##############################################################################
 # Include required HAL libs below                                            #
 ##############################################################################
-SRCS =  $(RUNTIME) \
-	$(wildcard $(PROJECT_SRC_DIR)/*.c) \
-	$(wildcard $(PROJECT_SRC_DIR)/*.cpp) \
-#	$(HAL_DIR)/peripherals/Source/mik32_hal_pcc.c \
-#	$(HAL_DIR)/peripherals/Source/mik32_hal_gpio.c \
-#	$(HAL_DIR)/peripherals/Source/mik32_hal_adc.c \
-#	$(SHARED_DIR)/libs/xprintf.c \
-#	$(SHARED_DIR)/libs/uart_lib.c \
+SRCS += $(wildcard $(PROJECT_SRC_DIR)/*.c)
+SRCS += $(wildcard $(PROJECT_SRC_DIR)/*.cpp)
+SRCS += $(RUNTIME)
+SRCS += $(SHARED_DIR)/libs/uart_lib.c
+#SRCS += $(SHARED_DIR)/libs/xprintf.c
+SRCS += $(HAL_DIR)/peripherals/Source/mik32_hal_gpio.c
+#SRCS += $(HAL_DIR)/peripherals/Source/mik32_hal_pcc.c
+#SRCS += $(HAL_DIR)/peripherals/Source/mik32_hal_adc.c
 	
-
+LIBS += 
 
 ##############################################################################
 #
 TOOLCHAIN_DIR = /opt/mik32
-CROSS = /opt/riscv64/bin/riscv64-unknown-elf-
+CROSS ?= /opt/riscv64/bin/riscv64-unknown-elf-
 MIK32_UPLOADER_DIR = /opt/mik32/mik32-uploader
 CC = $(CROSS)gcc
 LD = $(CROSS)ld
@@ -44,13 +44,12 @@ INC += -I $(HAL_DIR)/core/Include
 INC += -I $(HAL_DIR)/peripherals/Include
 INC += -I $(HAL_DIR)/utilities/Include
 
-LIBS += -lc
 
 OBJDIR = $(PROJECT_BUILD_DIR)
 
-CFLAGS +=  -Os -MD -fstrict-volatile-bitfields -fno-strict-aliasing -march=$(MARCH) -mabi=$(MABI) -fno-common -fno-builtin-printf -DBUILD_NUMBER=$(BUILD_NUMBER)+1
+CFLAGS +=  -Os -MD -fstrict-volatile-bitfields -fno-strict-aliasing -march=$(MARCH) -mabi=$(MABI) -fno-common -fno-builtin-printf -DBUILD_NUMBER=$(BUILD_NUMBER)+1 -flto -fno-common 
 
-LDFLAGS +=  -nostdlib -lgcc -mcmodel=medlow -nostartfiles -ffreestanding -Wl,-Bstatic,-T,$(LDSCRIPT),-Map,$(OBJDIR)/$(PROJECT_NAME).map,--print-memory-usage -march=$(MARCH) -mabi=$(MABI) -specs=nano.specs -lnosys
+LDFLAGS +=  -nostdlib -lgcc -mcmodel=medlow -nostartfiles -ffreestanding -Wl,-Bstatic,-T,$(LDSCRIPT),-Map,$(OBJDIR)/$(PROJECT_NAME).map,--print-memory-usage -march=$(MARCH) -mabi=$(MABI)
 
 
 OBJS := $(SRCS)
@@ -59,7 +58,6 @@ OBJS := $(OBJS:.cpp=.o)
 OBJS := $(OBJS:.S=.o)
 OBJS := $(OBJS:..=miaou)
 OBJS := $(addprefix $(OBJDIR)/,$(OBJS))
-
 
 all: $(OBJDIR)/$(PROJECT_NAME).elf $(OBJDIR)/$(PROJECT_NAME).hex $(OBJDIR)/$(PROJECT_NAME).bin $(OBJDIR)/$(PROJECT_NAME).asm
 
@@ -109,6 +107,10 @@ clean:
 
 
 
-upload: $(OBJDIR)/$(PROJECT_NAME).hex
-	python $(MIK32_UPLOADER_DIR)/mik32_upload.py --run-openocd --openocd-exec=`which openocd` --openocd-scripts $(MIK32_UPLOADER_DIR)/openocd-scripts --openocd-interface interface/ftdi/mikron-link.cfg $^
+upload:
+	python $(MIK32_UPLOADER_DIR)/mik32_upload.py --run-openocd --openocd-exec=`which openocd` --openocd-scripts $(MIK32_UPLOADER_DIR)/openocd-scripts --openocd-interface interface/ftdi/mikron-link.cfg $(OBJDIR)/$(PROJECT_NAME).hex 
+
+
+term:
+	sudo minicom -D /dev/ttyU*0 -b 115200
 
