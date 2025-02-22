@@ -14,7 +14,18 @@
 
 Для ОС Linux:
 
-```apt-get install gcc-riscv64-linux-gnu```
+```apt-get install riscv64-none-elf-gcc```
+
+Если в репозитории нет версии GCC для "голого железа" (Baremetal), то можно скачать пре-собранный пакет от xPack: https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-2/xpack-riscv-none-elf-gcc-14.2.0-2-linux-x64.tar.gz
+
+Скачать и распаковать в каталог ```/opt``` следующими командами:
+```
+wget https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-2/xpack-riscv-none-elf-gcc-14.2.0-2-linux-x64.tar.gz
+tar -zxpf xpack-riscv-none-elf-gcc-14.2.0-2-linux-x64.tar.gz -C /opt/
+```
+
+После чего путь к компилятору в переменной CROSS: ```/opt/xpack-riscv-none-elf-gcc-14.2.0-2/bin/riscv-none-elf-```
+
 
 Для ОС FreeBSD:
 
@@ -23,7 +34,7 @@ pkg install riscv64-none-elf-binutils
 pkg install riscv64-none-elf-gcc
 ``` 
 
-2. Скачать с [оригинального репозитория АО "Микрон"](https://github.com/MikronMIK32) набор HAL библиотек для MIK32] и утилиту прошивальщика.
+2. Скачать с [оригинального репозитория АО "Микрон"](https://github.com/MikronMIK32) набор HAL библиотек для MIK32 и утилиту прошивальщика.
 
 ```
 sudo bash
