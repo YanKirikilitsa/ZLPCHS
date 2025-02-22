@@ -75,3 +75,8 @@ Memory region         Used Size  Region Size  %age Used
              ram:         16 KB        16 KB    100.00%
 ```
 
+### Структура MIK32 AMUR
+
+![Структура MIK32 AMIR](AMUR_MIK32_structure.png)
+
+
