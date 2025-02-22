@@ -52,7 +52,7 @@ git clone https://github.com/MikronMIK32/mik32-uploader.git
 Для ОС Linux:
 
 ```
-make CROSS=/opt/riscv64/bin/riscv64-unknown-elf-
+make CROSS=/opt/xpack-riscv-none-elf-gcc-14.2.0-2/bin/riscv-none-elf-
 make upload
 ```
 
