@@ -66,7 +66,8 @@ int main(void)
 	PAD_CONFIG->PORT_0_CFG &= ~(0b11 << (2 * PIN_LED2)); // Сборос режимов для вывода 9
 	GPIO_0->DIRECTION_OUT = (1 << PIN_LED2); // Установка направления вывода 3 порта 0 на выход
 
-	PAD_CONFIG->PORT_1_CFG &= ~(0b11 << (2 * PIN_LED1)); // Сборос режимов для вывода 9
+	// Установка вывода 15 порта 1 в режим вход GPIO (BUTTON)
+	PAD_CONFIG->PORT_1_CFG &= ~(0b11 << (2 * PIN_BUTTON)); // Сборос режимов для вывода 15 
 	GPIO_1->DIRECTION_IN = (1 << PIN_BUTTON); // Установка направления вывода 15 порта 1 на вход
 
 	int counter = 0;
