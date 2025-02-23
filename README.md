@@ -34,7 +34,56 @@ pkg install riscv64-none-elf-binutils
 pkg install riscv64-none-elf-gcc
 ``` 
 
-2. Скачать с [оригинального репозитория АО "Микрон"](https://github.com/MikronMIK32) набор HAL библиотек для MIK32 и утилиту прошивальщика.
+2. Установить OpenOCD
+
+Для FreeBSD данная утилита устанавливается из стандартного репозитория:
+
+```
+sudo pkg install openocd
+```
+
+Утилита OpenOCD из стандартного репозитория ALT Linux не поддерживает RISC-V, поэтому устанаваливать надо из исходных кодов, ниже процедура из пяти шагов:
+
+2.1. Установить зависимости:
+
+```
+sudo apt-get install autoconf automake texinfo libtool jimtcl-devel libftdi1 libftdi1-devel
+```
+
+2.2. Скачать репозиторий OpenOCD с Github-а:
+
+```
+git clone https://github.com/riscv-collab/riscv-openocd
+```
+
+2.3. Запустить сборку:
+
+```
+cd riscv-openocd
+./bootstrap
+./configure
+make
+```
+
+2.4. Установить собранный пакет в систему:
+
+```
+sudo make install
+```
+
+2.5. Проверить, что OpenOCD нужной версии доступен:
+
+```
+$ openocd --version
+Open On-Chip Debugger 0.12.0+dev-04250-gf32f17831 (2025-02-23-05:27)
+Licensed under GNU GPL v2
+For bug reports, read
+        http://openocd.org/doc/doxygen/bugs.html
+
+```
+
+
+3. Скачать с [оригинального репозитория АО "Микрон"](https://github.com/MikronMIK32) набор HAL библиотек для MIK32 и утилиту прошивальщика.
 
 ```
 sudo bash
@@ -44,8 +93,8 @@ git clone https://github.com/MikronMIK32/mik32v2-shared.git
 git clone https://github.com/MikronMIK32/mik32-hal.git
 git clone https://github.com/MikronMIK32/mik32-uploader.git
 ```
-
-3. Установить в ```Makefile``` переменную CROSS указывающую на путь к кросс-компилятору если текущее значение не совпадает с фактическим.
+ 
+4. Установить в ```Makefile``` переменную CROSS указывающую на путь к кросс-компилятору если текущее значение не совпадает с фактическим.
 
 Можно не изменяя ```Makefile``` указать значение CROSS в коммандной строке.
 
