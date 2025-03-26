@@ -8,22 +8,14 @@
 #include "xprintf.h"
 #include "scr1_timer.h"
 
-#define START_BIT_LENGTH 4500
-#define ZERO_BIT_LENGTH 500 
-#define ONE_BIT_LENGTH 1500
-#define TOL 200
-
 void SystemClock_Config();
 void GPIO_Init();
 
-volatile uint32_t nachalo;
-volatile uint32_t cmd;
-volatile uint32_t count;
-volatile uint32_t ready;
-volatile uint32_t start;
-
+uint32_t flag = 0; 
+uint32_t timenow;
 int main()
 {
+    //HAL_Init();
     __HAL_SCR1_TIMER_ENABLE(); //Разрешаем работу системного таймера 
     SystemClock_Config();
 	// Установка параметров UART0 - отладочный порт
@@ -40,15 +32,18 @@ int main()
 
     while (1)
     {
-	uint32_t timenow;
         timenow = SCR1_TIMER->MTIME;
         HAL_GPIO_TogglePin(GPIO_1, GPIO_PIN_15);
 		for (volatile int i = 0; i < 100000; i++);
-	if(ready)
-		{
-		xprintf("CMD: 0x%08X\r\n", cmd);
-		ready = 0;
-		}
+        if (GPIO_1->STATE & (1 << 15))
+        {
+			xprintf("Trap %u \r\n", flag);
+//			flag = 0;
+        }
+        else
+        {
+			xprintf("NOT Trap %u\r\n", flag);
+        }
     }
 }
 
@@ -67,6 +62,7 @@ void SystemClock_Config(void)
     PCC_OscInit.LSI32KCalibrationValue = 8;
     PCC_OscInit.RTCClockSelection = PCC_RTC_CLOCK_SOURCE_AUTO;
     PCC_OscInit.RTCClockCPUSelection = PCC_CPU_RTC_CLOCK_SOURCE_OSC32K;
+    //HAL_PCC_Config(&PCC_OscInit);
 }
 
 void GPIO_Init()
@@ -89,44 +85,10 @@ void trap_handler()
     if (EPIC_CHECK_GPIO_IRQ())
     {
         if (HAL_GPIO_LineInterruptState(GPIO_LINE_7))
-	{
-		uint32_t value = HAL_GPIO_ReadPin(GPIO_1, GPIO_PIN_15);
-		if (value==1)
-		{
-			nachalo = SCR1_TIMER->MTIME;
-		}
-		else  
-		{
-			uint32_t konec = SCR1_TIMER->MTIME;
-			uint32_t delta = (konec - nachalo)/32;
-
-			if (delta > START_BIT_LENGTH - TOL && delta < START_BIT_LENGTH + TOL)
-			{
-				start = 1;
-				ready = 0;
-				cmd = 0;
-			}
-			if (start) 
-			{	
-				if (delta > ZERO_BIT_LENGTH - TOL && delta < ZERO_BIT_LENGTH + TOL)
-				{	
-					cmd = (cmd >> 1);
-					count++;
-				}
-
-				if (delta > ONE_BIT_LENGTH - TOL && delta < ONE_BIT_LENGTH + TOL)
-				{
-					cmd = 0x80000000 | (cmd >> 1);
-					count++;
-				}
-				if (count == 32)
-				{
-					count = 0;
-					ready = 1;
-					start = 0;
-				}
-			}
-		}
+        {
+		xprintf("IRQ_LINE7\r\n");
+		xprintf("TIME:  %u \r\n", timenow);
+            flag = 1;
         }
         HAL_GPIO_ClearInterrupts();
     }

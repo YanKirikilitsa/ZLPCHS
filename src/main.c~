@@ -24,6 +24,7 @@ volatile uint32_t start;
 
 int main()
 {
+    //HAL_Init();
     __HAL_SCR1_TIMER_ENABLE(); //Разрешаем работу системного таймера 
     SystemClock_Config();
 	// Установка параметров UART0 - отладочный порт
@@ -43,12 +44,13 @@ int main()
 	uint32_t timenow;
         timenow = SCR1_TIMER->MTIME;
         HAL_GPIO_TogglePin(GPIO_1, GPIO_PIN_15);
+       // HAL_GPIO_TogglePin(GPIO_2, GPIO_PIN_1);
 		for (volatile int i = 0; i < 100000; i++);
-	if(ready)
-		{
+	if(ready) {
 		xprintf("CMD: 0x%08X\r\n", cmd);
 		ready = 0;
-		}
+	}
+	xprintf("count = %d start = %d \r\n",count,start);
     }
 }
 
@@ -67,6 +69,7 @@ void SystemClock_Config(void)
     PCC_OscInit.LSI32KCalibrationValue = 8;
     PCC_OscInit.RTCClockSelection = PCC_RTC_CLOCK_SOURCE_AUTO;
     PCC_OscInit.RTCClockCPUSelection = PCC_CPU_RTC_CLOCK_SOURCE_OSC32K;
+    //HAL_PCC_Config(&PCC_OscInit);
 }
 
 void GPIO_Init()
@@ -88,8 +91,12 @@ void trap_handler()
 {
     if (EPIC_CHECK_GPIO_IRQ())
     {
+//	xprintf("TIME:  %u\r\n", SCR1_TIMER->MTIME);
         if (HAL_GPIO_LineInterruptState(GPIO_LINE_7))
+        
 	{
+//		xprintf("IRQ_LINE7\r\n");
+
 		uint32_t value = HAL_GPIO_ReadPin(GPIO_1, GPIO_PIN_15);
 		if (value==1)
 		{
@@ -99,6 +106,7 @@ void trap_handler()
 		{
 			uint32_t konec = SCR1_TIMER->MTIME;
 			uint32_t delta = (konec - nachalo)/32;
+//			xprintf("delta = %u \r\n", delta);
 
 			if (delta > START_BIT_LENGTH - TOL && delta < START_BIT_LENGTH + TOL)
 			{
@@ -106,6 +114,7 @@ void trap_handler()
 				ready = 0;
 				cmd = 0;
 			}
+			//	xprintf("START_BIT_ACCEPT");
 			if (start) 
 			{	
 				if (delta > ZERO_BIT_LENGTH - TOL && delta < ZERO_BIT_LENGTH + TOL)
@@ -113,17 +122,20 @@ void trap_handler()
 					cmd = (cmd >> 1);
 					count++;
 				}
+				//	xprintf("ZERO_BIT_ACCEPT");
 
 				if (delta > ONE_BIT_LENGTH - TOL && delta < ONE_BIT_LENGTH + TOL)
 				{
 					cmd = 0x80000000 | (cmd >> 1);
 					count++;
 				}
+				//	xprintf("ONE_BIT_ACCEPT");
 				if (count == 32)
 				{
 					count = 0;
 					ready = 1;
 					start = 0;
+//					xprintf("Command word: %x \r\n", cmd);
 				}
 			}
 		}
