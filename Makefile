@@ -14,6 +14,10 @@ SRCS += $(RUNTIME)
 
 SRCS += $(HAL_DIR)/peripherals/Source/mik32_hal_gpio.c
 SRCS += $(HAL_DIR)/peripherals/Source/mik32_hal_irq.c
+SRCS += $(HAL_DIR)/peripherals/Source/mik32_hal_pcc.c 
+SRCS += $(HAL_DIR)/peripherals/Source/mik32_hal_adc.c 
+SRCS += $(HAL_DIR)/core/Source/mik32_hal_scr1_timer.c 
+
 
 LIBS += -lc
 
