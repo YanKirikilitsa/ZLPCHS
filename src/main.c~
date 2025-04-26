@@ -249,9 +249,9 @@ int main()
             HAL_ADC_SINGLE_AND_SET_CH(hadc.Instance, 0);
             adc_raw_value = HAL_ADC_WaitAndGetValue(&hadc);
             adc_corrected_value = adc_raw_value - ADC_OFFSET;
-	    adc_avg[0] = (adc_avg[0]*1 + adc_corrected_value*1023) >> 10;
+	    adc_avg[0] = (adc_avg[0]*1 + adc_corrected_value*511) >> 9;
 
-            if (countADC % 16000 == 0) 
+            if (countADC % 8000 == 0) 
 	    {
 		    	xprintf("ADC[%d]: %4d/%4d/%4d (%d,%03d V)\r\n", 
 			0, adc_raw_value, adc_corrected_value, adc_avg[0],
